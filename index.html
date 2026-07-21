@@ -586,8 +586,13 @@
     </div>
 
     <div class="campo">
-      <label>Endereço com número *</label>
-      <input type="text" id="endereco" placeholder="Rua, número">
+      <label>Endereço *</label>
+      <input type="text" id="endereco" placeholder="Rua, Avenida, Travessa...">
+    </div>
+
+    <div class="campo">
+      <label>Número *</label>
+      <input type="text" id="numero" placeholder="Nº" inputmode="numeric">
     </div>
 
     <div class="campo-duo">
@@ -837,12 +842,20 @@
     <div class="campo">
       <label>Deseja personalizar com iniciais e/ou data? *</label>
       <div class="opcoes horizontal" id="iniciais-opcoes">
-        <div class="opcao-item" data-val="sim" onclick="selecionarOpcao(this,'iniciais')">
+        <div class="opcao-item" data-val="sim" onclick="selecionarOpcao(this,'iniciais'); toggleIniciais('sim')">
           <div class="opcao-radio"></div> Sim
         </div>
-        <div class="opcao-item" data-val="nao" onclick="selecionarOpcao(this,'iniciais')">
+        <div class="opcao-item" data-val="nao" onclick="selecionarOpcao(this,'iniciais'); toggleIniciais('nao')">
           <div class="opcao-radio"></div> Não
         </div>
+      </div>
+    </div>
+
+    <div id="campo-iniciais-texto" style="display:none">
+      <div class="campo">
+        <label>O que devo escrever? *</label>
+        <div class="hint">Ex: N & R · 15/05/2026</div>
+        <input type="text" id="iniciais-texto" placeholder="Iniciais e/ou data">
       </div>
     </div>
 
@@ -1175,8 +1188,17 @@ function aplicarLogicaQuem(val) {
 }
 
 function togglePix(mostrar) {
-  document.getElementById('campo-valor-pix').style.display = mostrar ? 'block' : 'none';
-  if (!mostrar) document.getElementById('valor-pix').value = '';
+  const el = document.getElementById('campo-valor-pix');
+  if (el) el.style.display = mostrar ? 'block' : 'none';
+  if (!mostrar) {
+    const input = document.getElementById('valor-pix');
+    if (input) input.value = '';
+  }
+}
+
+function toggleIniciais(val) {
+  document.getElementById('campo-iniciais-texto').style.display = val === 'sim' ? 'block' : 'none';
+  if (val === 'nao') document.getElementById('iniciais-texto').value = '';
 }
 
 function pixNecessario() {
@@ -1255,7 +1277,7 @@ function validar1() {
   if (estado.quem === 'noiva' && vazio('nome-noivo')) { mostrarErro('erro-1'); return false; }
   if (estado.quem === 'noivo' && vazio('nome-noiva')) { mostrarErro('erro-1'); return false; }
   if (vazio('data-casamento') || vazio('data-nascimento') || vazio('cpf') || vazio('rg')) { mostrarErro('erro-1'); return false; }
-  if (vazio('endereco') || vazio('bairro') || vazio('cep') || vazio('cidade')) { mostrarErro('erro-1'); return false; }
+  if (vazio('endereco') || vazio('numero') || vazio('bairro') || vazio('cep') || vazio('cidade')) { mostrarErro('erro-1'); return false; }
   if (!document.getElementById('estado').value) { mostrarErro('erro-1'); return false; }
   if (vazio('ddd') || vazio('whatsapp') || vazio('email')) { mostrarErro('erro-1'); return false; }
   return true;
@@ -1268,6 +1290,7 @@ function validar2() {
 }
 function validar3() {
   if (estado.pecasSelecionadas.length === 0 || !estado.iniciais) { mostrarErro('erro-3'); return false; }
+  if (estado.iniciais === 'sim' && vazio('iniciais-texto')) { mostrarErro('erro-3'); return false; }
   return true;
 }
 function validar4() {
@@ -1355,6 +1378,7 @@ function enviarWhatsApp() {
   const cpf = document.getElementById('cpf').value;
   const rg = document.getElementById('rg').value;
   const end = document.getElementById('endereco').value;
+  const numero = document.getElementById('numero').value;
   const bairro = document.getElementById('bairro').value;
   const cep = document.getElementById('cep').value;
   const obs = document.getElementById('obs').value;
@@ -1381,7 +1405,7 @@ function enviarWhatsApp() {
   msg += `*Data de nascimento:* ${dataNasc}\n\n`;
   msg += `*CPF:* ${cpf}\n\n`;
   msg += `*RG:* ${rg}\n\n`;
-  msg += `*Endereço:* ${end}\n\n`;
+  msg += `*Endereço:* ${end}, ${numero}\n\n`;
   msg += `*Bairro:* ${bairro}\n\n`;
   msg += `*CEP:* ${cep}\n\n`;
   msg += `*Cidade:* ${cidade}\n\n`;
@@ -1411,7 +1435,7 @@ function enviarWhatsApp() {
   msg += `*Florista:* ${document.getElementById('insta-florista').value}\n\n`;
   msg += `*Cerimonialista:* ${document.getElementById('insta-cerimonial').value}\n\n`;
   msg += `*Como me conheceu:* ${document.getElementById('como-conheceu').value}\n\n`;
-  msg += `*Iniciais e data:* ${estado.iniciais === 'sim' ? 'Sim' : 'Não'}\n\n`;
+  msg += `*Iniciais e data:* ${estado.iniciais === 'sim' ? 'Sim — ' + document.getElementById('iniciais-texto').value : 'Não'}\n\n`;
   if (obs) msg += `*Observações:* ${obs}\n\n`;
   if (preferencias) msg += `*Preferências de layout:* ${preferencias}\n\n`;
 
